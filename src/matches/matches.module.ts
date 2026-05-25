@@ -1,0 +1,20 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '../auth/auth.module';
+import { User } from '../auth/entities/user.entity';
+import { Stage } from '../tournaments/entities/stage.entity';
+import { Team } from '../tournaments/entities/team.entity';
+import { MatchResult } from './entities/match-result.entity';
+import { Match } from './entities/match.entity';
+import { MatchesController } from './matches.controller';
+import { MatchesService } from './matches.service';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Match, MatchResult, Stage, Team, User]),
+    AuthModule,
+  ],
+  controllers: [MatchesController],
+  providers: [MatchesService],
+})
+export class MatchesModule {}

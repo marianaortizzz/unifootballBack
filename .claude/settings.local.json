@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(grep -E \"^bcrypt$|^passport\")",
+      "Bash(grep -E \"^bcrypt$|^passport$|^passport-jwt$\")",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" npm install @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt @nestjs/swagger)"
+    ]
+  }
+}
