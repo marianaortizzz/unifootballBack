@@ -3,12 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Model } from 'mongoose';
+import { In, Repository } from 'typeorm';
 import { User, UserRole } from '../auth/entities/user.entity';
+import {
+  MatchEvent,
+  MatchEventDocument,
+} from '../mongo/schemas/match-event.schema';
 import { Stage } from '../tournaments/entities/stage.entity';
 import { Team } from '../tournaments/entities/team.entity';
 import { CreateMatchDto } from './dto/create-match.dto';
+import { LiveMatchDto } from './dto/live-match.dto';
 import { UpdateMatchResultDto } from './dto/update-match-result.dto';
 import {
   MatchResult,
@@ -29,6 +36,8 @@ export class MatchesService {
     private readonly teamRepo: Repository<Team>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectModel(MatchEvent.name)
+    private readonly matchEventModel: Model<MatchEventDocument>,
   ) {}
 
   async create(dto: CreateMatchDto): Promise<Match> {
@@ -122,5 +131,58 @@ export class MatchesService {
     result.status = dto.status ?? MatchResultStatus.PLAYED;
 
     return this.resultRepo.save(result);
+  }
+
+  async getLive(matchId: string): Promise<LiveMatchDto> {
+    const match = await this.matchRepo.findOne({
+      where: { id: matchId },
+      relations: { homeTeam: true, awayTeam: true },
+    });
+    if (!match) {
+      throw new NotFoundException(`Partido ${matchId} no encontrado`);
+    }
+
+    const result = await this.resultRepo.findOne({ where: { matchId } });
+
+    const events = await this.matchEventModel
+      .find({ matchId })
+      .sort({ minute: 1, createdAt: 1 })
+      .lean()
+      .exec();
+
+    // Resolver nombres de jugador y equipo en lote para el timeline.
+    const playerIds = [...new Set(events.map((e) => e.playerId))];
+    const teamIds = [...new Set(events.map((e) => e.teamId))];
+
+    const players = playerIds.length
+      ? await this.userRepo.find({ where: { id: In(playerIds) } })
+      : [];
+    const teams = teamIds.length
+      ? await this.teamRepo.find({ where: { id: In(teamIds) } })
+      : [];
+
+    const playerName = new Map(players.map((p) => [p.id, p.name]));
+    const teamName = new Map(teams.map((t) => [t.id, t.name]));
+
+    return {
+      matchId: match.id,
+      homeTeamName: match.homeTeam?.name ?? null,
+      awayTeamName: match.awayTeam?.name ?? null,
+      result: result
+        ? {
+            homeScore: result.homeScore,
+            awayScore: result.awayScore,
+            status: result.status,
+          }
+        : null,
+      events: events.map((e) => ({
+        _id: String(e._id),
+        type: e.type,
+        minute: e.minute,
+        playerName: playerName.get(e.playerId) ?? e.playerId,
+        teamName: teamName.get(e.teamId) ?? e.teamId,
+        description: e.description ?? null,
+      })),
+    };
   }
 }

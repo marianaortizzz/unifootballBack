@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateMatchDto } from './dto/create-match.dto';
+import { LiveMatchDto } from './dto/live-match.dto';
 import { ListMatchesQueryDto } from './dto/list-matches.dto';
 import { UpdateMatchResultDto } from './dto/update-match-result.dto';
 import { MatchResult } from './entities/match-result.entity';
@@ -39,6 +40,14 @@ export class MatchesController {
   @ApiOperation({ summary: 'Listar partidos (opcionalmente filtrados por torneo)' })
   findAll(@Query() query: ListMatchesQueryDto): Promise<Match[]> {
     return this.service.findAll(query.tournament_id);
+  }
+
+  @Get(':id/live')
+  @ApiOperation({
+    summary: 'Estado en vivo de un partido (marcador, equipos y timeline)',
+  })
+  getLive(@Param('id', ParseUUIDPipe) id: string): Promise<LiveMatchDto> {
+    return this.service.getLive(id);
   }
 
   @Patch(':id/result')
