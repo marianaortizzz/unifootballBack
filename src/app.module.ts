@@ -6,6 +6,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { MatchesModule } from './matches/matches.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
+import { StatsModule } from './stats/stats.module';
+import { GraphModule } from './graph/graph.module';
+import { NotificationsModule } from './notifications/notifications.module';
+
+
 
 @Module({
   imports: [
@@ -24,6 +29,9 @@ import { TournamentsModule } from './tournaments/tournaments.module';
     AuthModule,
     TournamentsModule,
     MatchesModule,
+    StatsModule,
+    GraphModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
