@@ -16,9 +16,11 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { AddTeamToTournamentDto } from './dto/add-team-to-tournament.dto';
+import { CreateStageDto } from './dto/create-stage.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
+import { Stage } from './entities/stage.entity';
 import { TeamMember } from './entities/team-member.entity';
 import { Team } from './entities/team.entity';
 import { TournamentTeam } from './entities/tournament-team.entity';
@@ -68,6 +70,23 @@ export class TournamentsController {
     @Body() dto: AddTeamToTournamentDto,
   ): Promise<TournamentTeam> {
     return this.service.addTeamToTournament(id, dto);
+  }
+
+  // ---------- Stages ----------
+
+  @Get('tournaments/:id/stages')
+  @ApiOperation({ summary: 'Listar fases de un torneo' })
+  findStages(@Param('id', ParseUUIDPipe) id: string): Promise<Stage[]> {
+    return this.service.findStages(id);
+  }
+
+  @Post('tournaments/:id/stages')
+  @ApiOperation({ summary: 'Crear una fase del torneo' })
+  createStage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateStageDto,
+  ): Promise<Stage> {
+    return this.service.createStage(id, dto);
   }
 
   // ---------- Teams ----------

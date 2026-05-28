@@ -6,7 +6,11 @@
       "Bash(grep -E \"^bcrypt$|^passport$|^passport-jwt$\")",
       "Bash(NODE_OPTIONS=\"--use-system-ca\" npm install @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt @nestjs/swagger)",
       "Bash(npx nest *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://unifootball.onrender.com/api/docs)",
+      "Bash(curl -s https://unifootball.onrender.com/api/docs-json)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(sorted\\(d['paths'].keys\\(\\)\\)\\)\\)\")",
+      "Bash(node *)"
     ]
   }
 }

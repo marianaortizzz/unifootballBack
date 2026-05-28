@@ -9,9 +9,11 @@ import { Repository } from 'typeorm';
 import { User } from '../auth/entities/user.entity';
 import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { AddTeamToTournamentDto } from './dto/add-team-to-tournament.dto';
+import { CreateStageDto } from './dto/create-stage.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
+import { Stage } from './entities/stage.entity';
 import {
   TeamMember,
   TeamMemberRole,
@@ -31,6 +33,8 @@ export class TournamentsService {
     private readonly tournamentTeamRepo: Repository<TournamentTeam>,
     @InjectRepository(TeamMember)
     private readonly teamMemberRepo: Repository<TeamMember>,
+    @InjectRepository(Stage)
+    private readonly stageRepo: Repository<Stage>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
@@ -130,6 +134,38 @@ export class TournamentsService {
       description: dto.description ?? null,
     });
     return this.teamRepo.save(team);
+  }
+
+  // ---------- Stages ----------
+
+  async createStage(
+    tournamentId: string,
+    dto: CreateStageDto,
+  ): Promise<Stage> {
+    await this.findTournament(tournamentId);
+    const existing = await this.stageRepo.findOne({
+      where: { tournamentId, order: dto.order },
+    });
+    if (existing) {
+      throw new ConflictException(
+        `Ya existe una fase con order=${dto.order} en este torneo`,
+      );
+    }
+    const stage = this.stageRepo.create({
+      tournamentId,
+      name: dto.name,
+      type: dto.type,
+      order: dto.order,
+    });
+    return this.stageRepo.save(stage);
+  }
+
+  async findStages(tournamentId: string): Promise<Stage[]> {
+    await this.findTournament(tournamentId);
+    return this.stageRepo.find({
+      where: { tournamentId },
+      order: { order: 'ASC' },
+    });
   }
 
   async addTeamMember(
