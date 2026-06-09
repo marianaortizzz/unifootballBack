@@ -21,7 +21,12 @@ import { TournamentsModule } from './tournaments/tournaments.module';
         url: config.get<string>('DATABASE_URL'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, // solo para desarrollo
-        ssl: { rejectUnauthorized: false }, // requerido por Supabase
+        // SSL solo para proveedores cloud (Supabase). En local se desactiva
+        // con DB_SSL=false para no romper la conexión a un Postgres sin TLS.
+        ssl:
+          config.get<string>('DB_SSL') === 'false'
+            ? false
+            : { rejectUnauthorized: false },
       }),
     }),
     MongooseModule.forRootAsync({

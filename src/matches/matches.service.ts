@@ -97,6 +97,20 @@ export class MatchesService {
     return saved;
   }
 
+  async findOne(id: string): Promise<Match> {
+    const match = await this.matchRepo.findOne({
+      where: { id },
+      relations: { stage: true, homeTeam: true, awayTeam: true, referee: true },
+    });
+    if (!match) {
+      throw new NotFoundException(`Partido ${id} no encontrado`);
+    }
+    if (match.referee) {
+      delete (match.referee as Partial<User>).password;
+    }
+    return match;
+  }
+
   async findAll(tournamentId?: string): Promise<Match[]> {
     const qb = this.matchRepo
       .createQueryBuilder('match')

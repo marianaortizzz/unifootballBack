@@ -9,6 +9,7 @@ import { Match } from './match.entity';
 
 export enum MatchResultStatus {
   PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
   PLAYED = 'played',
   CANCELLED = 'cancelled',
 }

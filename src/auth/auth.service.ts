@@ -30,6 +30,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  listUsers(role?: UserRole): Promise<Pick<User, 'id' | 'name' | 'email' | 'role'>[]> {
+    return this.userRepo.find({
+      select: { id: true, name: true, email: true, role: true },
+      where: role ? { role } : {},
+      order: { name: 'ASC' },
+    });
+  }
+
   async register(dto: RegisterDto): Promise<AuthResponse> {
     const existing = await this.userRepo.findOne({ where: { email: dto.email } });
     if (existing) {

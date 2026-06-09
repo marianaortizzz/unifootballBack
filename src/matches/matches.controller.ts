@@ -42,6 +42,12 @@ export class MatchesController {
     return this.service.findAll(query.tournament_id);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener un partido por id (con equipos y árbitro)' })
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Match> {
+    return this.service.findOne(id);
+  }
+
   @Get(':id/live')
   @ApiOperation({
     summary: 'Estado en vivo de un partido (marcador, equipos y timeline)',

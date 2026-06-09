@@ -91,6 +91,11 @@ export class TournamentsService {
     return this.tournamentRepo.save(tournament);
   }
 
+  async removeTournament(id: string): Promise<void> {
+    const tournament = await this.findTournament(id);
+    await this.tournamentRepo.remove(tournament);
+  }
+
   async addTeamToTournament(
     tournamentId: string,
     dto: AddTeamToTournamentDto,
@@ -111,6 +116,15 @@ export class TournamentsService {
       teamId: dto.teamId,
     });
     return this.tournamentTeamRepo.save(registration);
+  }
+
+  async findTournamentTeams(tournamentId: string): Promise<TournamentTeam[]> {
+    await this.findTournament(tournamentId);
+    return this.tournamentTeamRepo.find({
+      where: { tournamentId },
+      relations: { team: true },
+      order: { registeredAt: 'ASC' },
+    });
   }
 
   // ---------- Teams ----------
@@ -166,6 +180,20 @@ export class TournamentsService {
       where: { tournamentId },
       order: { order: 'ASC' },
     });
+  }
+
+  async findTeamMembers(teamId: string): Promise<TeamMember[]> {
+    await this.findTeam(teamId);
+    const members = await this.teamMemberRepo.find({
+      where: { teamId },
+      relations: { user: true },
+      order: { jerseyNumber: 'ASC' },
+    });
+    // No exponer el hash de contraseña en la plantilla.
+    for (const m of members) {
+      if (m.user) delete (m.user as Partial<User>).password;
+    }
+    return members;
   }
 
   async addTeamMember(

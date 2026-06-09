@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -63,6 +66,21 @@ export class TournamentsController {
     return this.service.updateTournament(id, dto);
   }
 
+  @Delete('tournaments/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar un torneo' })
+  removeTournament(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.service.removeTournament(id);
+  }
+
+  @Get('tournaments/:id/teams')
+  @ApiOperation({ summary: 'Listar equipos inscritos en un torneo' })
+  findTournamentTeams(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<TournamentTeam[]> {
+    return this.service.findTournamentTeams(id);
+  }
+
   @Post('tournaments/:id/teams')
   @ApiOperation({ summary: 'Inscribir un equipo al torneo' })
   addTeamToTournament(
@@ -107,6 +125,14 @@ export class TournamentsController {
   @ApiOperation({ summary: 'Crear un equipo' })
   createTeam(@Body() dto: CreateTeamDto): Promise<Team> {
     return this.service.createTeam(dto);
+  }
+
+  @Get('teams/:id/members')
+  @ApiOperation({ summary: 'Listar la plantilla de un equipo' })
+  findTeamMembers(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<TeamMember[]> {
+    return this.service.findTeamMembers(id);
   }
 
   @Post('teams/:id/members')
